@@ -1,3 +1,12 @@
 Requires:
 sleekxmpp
 dnspython
+
+
+Version 0.1:
+-Able to connect to an XMPP server
+-That's it
+
+Currently working on:
+-Markov equations (Poisson probably?)
+-Build in database to follow
