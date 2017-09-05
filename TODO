@@ -1,0 +1,6 @@
+multiple place usage (discord extensibility)
+separate out connection class to separate script
+figure out how to have a local re-init without restarting the whole bot
+configurations to force TLS/SSL/weird shit
+enable multiple rooms
+"NICK = NAME # i'll bother with this later"
