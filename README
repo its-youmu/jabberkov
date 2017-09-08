@@ -1,12 +1,21 @@
+Jabberkov
+Built by aura/kyle
+
+Current markov code from: https://github.com/G3Kappa/Adjustable-Markov-Chains
+
 Requires:
 sleekxmpp
 dnspython
+NLTK          http://www.nltk.org/install.html
 
 
 Version 0.1:
 -Able to connect to an XMPP server
--That's it
+-Generate unique sentences based on documentation
+-No actual functionality at this time
 
 Currently working on:
--Markov equations (Poisson probably?)
+
+Rebuilding Markov (later):
 -Build in database to follow
+-Markov equations (Poisson probably?)
