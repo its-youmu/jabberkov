@@ -6,8 +6,9 @@ from functools import reduce
 
 
 class MarkovChain:
-    def __init__(self):
+    def __init__(self, vForce=False):
         self.tree = dict()
+        self.vForce = vForce
 
     '''
     Trains the generator on a block of text.
@@ -84,29 +85,35 @@ class MarkovChain:
 
         return i
 
+
     '''
     Yields a sequence of words until a dead end is found or until a maximum length, if specified, is reached.
     '''
-    def generate(self, start_with=None, max_len=13, rand=lambda x: random.random(), verbose=False):
+    def generate(self, start_with=None, max_len=20, rand=lambda x: random.random(), verbose=False):
+        # If there's nothing here, end
         if len(self.tree) == 0:
             return
 
         # Start with a given word, or randomize one that exists already.
         word = start_with if start_with is not None else random.choice([key for key in self.tree])
-
         if verbose:
             print('Generating a sentence of {0}, starting with "{1}":\n'
                   .format('max. {0} words'.format(max_len) if max_len > 0 else 'unspecified length', word))
 
-        # Yield the starting word
-        yield word
+        # If this word doesn't have a first-level entry in the tree
+        # (i.e. no word was ever found next to it during training),
+        # GENERATE A NEW ONE, we want a sentence.  Otherwise, yield the starting word
+        if word not in self.tree:
+            self.vForce = True
+            return
+        else:
+            yield word
 
         i = 1
         while max_len == 0 or i < max_len:
+            q = 0
             i += 1
-            # If this word doesn't have a first-level entry in the tree
-            # (i.e. no word was ever found next to it during training),
-            # stop yielding. We've reached a dead end.
+            # this is a safety catch -end the chain if it reaches
             if word not in self.tree:
                 return
 
@@ -114,45 +121,20 @@ class MarkovChain:
             dist = sorted(((w, rand(self.tree[word][w] // len(self.tree[word]))) for w in self.tree[word]),
                           # And sort the result in decreasing order.
                           key=lambda k: 1-k[1])
+
             # And yield the highest scoring word
             word = dist[0][0]
+
+            # Go through checks to try and stop from repeating numbers
+            # Especially troublesome if you can't intelligently sanitize numbers
+            # from the database efficiently - often generates strings of numbers
+            while q < 2:
+                if word.isdigit() is True:
+                    dist = sorted(((w, rand(self.tree[word][w] // len(self.tree[word]))) for w in self.tree[word]),
+                                    key=lambda k: 1-k[1])
+                    q += 1
+                else: break
             yield word
-
-    '''
-    Same as generate(), but formats the output nicely.
-    '''
-    def generate_formatted(self, word_wrap=160, soft_wrap=True, newline_chars='.?!', capitalize_chars='.?!"',
-                           start_with=None, max_len=0, verbose=False):
-        # Word-wrap counter
-        ww = 0
-        # Last character. If capitalization is required, make the first word capitalized.
-        lc = capitalize_chars[0] if len(capitalize_chars) > 0 else ''
-
-        for w in self.generate(start_with=start_with, max_len=max_len, verbose=verbose):
-            # Capitalize if the last character was a capitalization character, or if the first one is.
-            # The latter gotcha might be useful if one wants to capitalize text inside quotation marks, for example.
-            wstr = w.capitalize() if lc in capitalize_chars else w[0] + w[1:].capitalize() if w[0] in capitalize_chars else w
-            wstr += ' ' if w[-1] not in newline_chars else '\n'
-
-            if word_wrap > 0:
-                ww += len(wstr)
-                if wstr[-1] == '\n':
-                    ww = 0
-
-                if ww >= word_wrap:
-                    # Soft wrap = words can exceed the margin
-                    if soft_wrap:
-                        wstr += '\n'
-                        ww = 0
-                    # Hard wrap = words get truncated at the margin
-                    else:
-                        i = len(wstr) - ww + word_wrap
-                        wstr = wstr[:i] + '\n' + wstr[i:]
-                        ww -= word_wrap
-
-            yield wstr
-            # -2 because the actual last character is either a space or a newline.
-            lc = wstr[-2]
 
     '''
     Adjusts the relationships between branch and leaf according to a fitness function f.
@@ -196,4 +178,4 @@ class MarkovChain:
 
         if verbose:
             print('\r[{0}] - {1:.2f}%'.format('=' * pbar_len, 100))
-print('Training complete.')
+            print('Training complete.')
