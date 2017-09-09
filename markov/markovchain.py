@@ -33,7 +33,7 @@ class MarkovChain:
     Trains the generator on a single file.
     '''
     def train_on_file(self, filename, encodings=None, verbose=False):
-        encodings = encodings if encodings is not None else ['utf-8', 'ISO-8859-1']
+        encodings = encodings if encodings is not None else ['utf-8']
         ret = False
         # If your input files have mismatching encoding, try a few, good ones. If all fails, report back.
         for encoding in encodings:
@@ -87,7 +87,7 @@ class MarkovChain:
     '''
     Yields a sequence of words until a dead end is found or until a maximum length, if specified, is reached.
     '''
-    def generate(self, start_with=None, max_len=0, rand=lambda x: random.random() * x, verbose=False):
+    def generate(self, start_with=None, max_len=13, rand=lambda x: random.random(), verbose=False):
         if len(self.tree) == 0:
             return
 
@@ -111,7 +111,7 @@ class MarkovChain:
                 return
 
             # Otherwise, randomize against the weight of each leaf word divided by the number of leaves.
-            dist = sorted([(w, rand(self.tree[word][w] / len(self.tree[word]))) for w in self.tree[word]],
+            dist = sorted(((w, rand(self.tree[word][w] // len(self.tree[word]))) for w in self.tree[word]),
                           # And sort the result in decreasing order.
                           key=lambda k: 1-k[1])
             # And yield the highest scoring word
@@ -121,14 +121,14 @@ class MarkovChain:
     '''
     Same as generate(), but formats the output nicely.
     '''
-    def generate_formatted(self, word_wrap=80, soft_wrap=True, newline_chars='.?!', capitalize_chars='.?!"',
-                           start_with=None, max_len=0, rand=lambda x: random.random() * x, verbose=False):
+    def generate_formatted(self, word_wrap=160, soft_wrap=True, newline_chars='.?!', capitalize_chars='.?!"',
+                           start_with=None, max_len=0, verbose=False):
         # Word-wrap counter
         ww = 0
         # Last character. If capitalization is required, make the first word capitalized.
         lc = capitalize_chars[0] if len(capitalize_chars) > 0 else ''
 
-        for w in self.generate(start_with=start_with, max_len=max_len, rand=rand, verbose=verbose):
+        for w in self.generate(start_with=start_with, max_len=max_len, verbose=verbose):
             # Capitalize if the last character was a capitalization character, or if the first one is.
             # The latter gotcha might be useful if one wants to capitalize text inside quotation marks, for example.
             wstr = w.capitalize() if lc in capitalize_chars else w[0] + w[1:].capitalize() if w[0] in capitalize_chars else w
