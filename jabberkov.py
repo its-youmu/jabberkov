@@ -2,7 +2,7 @@
 # @youmusec // https://github.com/its-youmu
 # built off of the following: markov-text, sleekxmpp
 # configuration of settings can be done in config.ini
-# ver 0.0.1
+# ver 0.2
 
 import sleekxmpp
 import logging
