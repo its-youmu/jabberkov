@@ -12,15 +12,19 @@ https://github.com/G3Kappa/Adjustable-Markov-Chains
 Requires:
 sleekxmpp
 dnspython
-NLTK          http://www.nltk.org/install.html
+# (soon) NLTK      http://www.nltk.org/install.html
+
+Version 0.2:
+-Fixed float issues
+-Provides a sentence when called now
 
 Version 0.1:
 -Able to connect to an XMPP server
 -Generate unique sentences based on documentation
 
 Currently working on:
--Float issues (aka "why can't I just declare this
-  var as an int?")
+-Setting up so we can pass in argument(s) and return
+  a result
 -integration into main bot
 
 Rebuilding Markov (later):
